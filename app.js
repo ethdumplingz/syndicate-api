@@ -1,6 +1,26 @@
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 3001;
+const express = require("express"),
+	bodyParser = require("body-parser"),
+	helmet = require('helmet');
+
+const app = express(),
+	port = process.env.PORT || 3001;
+
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+
+// Apply the rate limiting middleware to all requests
+app.use(limiter);
+
+app.use(helmet());//for security purposes
+
+app.use(bodyParser.json({limit: '200mb'}));
+app.use(bodyParser.urlencoded({limit: '200mb', extended: true}));
 
 app.get("/", (req, res) => res.type('html').send(html));
 
@@ -58,18 +78,5 @@ const html = `
 </html>
 `
 
-app.get("/contracts/:address", (req, res, next) => {
-	const loggingTag = `[path:${req.path}]`;
-	let rj = {
-			ok: false,
-			address: '',
-			contracts:[]
-		},
-		statusCode = 400;
-	try{
-		rj.address = req.params.address;
-		res.json(rj).status(statusCode).end();
-	} catch(e){
-		console.error(`${loggingTag} Error:`, e);
-	}
-});
+const apiRouter = require('./routes/api');
+app.use(`/`, apiRouter);
