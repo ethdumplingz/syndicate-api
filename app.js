@@ -57,3 +57,19 @@ const html = `
   </body>
 </html>
 `
+
+app.get("/contracts/:address", (req, res, next) => {
+	const loggingTag = `[path:${req.path}]`;
+	let rj = {
+			ok: false,
+			address: '',
+			contracts:[]
+		},
+		statusCode = 400;
+	try{
+		rj.address = req.params.address;
+		res.json(rj).status(statusCode).end();
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+	}
+});
