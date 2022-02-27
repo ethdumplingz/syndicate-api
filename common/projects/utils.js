@@ -3,7 +3,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `projects`;
 
-const insertProject = async ({title = '', description = '', website_url = ''} = {}) => {
+const insertProject = async ({title = '', description = '', website_url = '', twitter_url = '', discord_url= '', is_discord_open= true, pre_sale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[insertProject]`;
 	let outcome;
 	try{
@@ -11,8 +11,8 @@ const insertProject = async ({title = '', description = '', website_url = ''} = 
 		// console.info(`${loggingTag} got client`, client);
 		const insertQuery = {
 			name: `add-project`,
-			text: `INSERT INTO ${table}(title, description, website_url) values($1, $2, $3)`,
-			values: [title, description, website_url]
+			text: `INSERT INTO ${table}(title, description, website_url, twitter_url, discord_url, is_discord_open, pre_sale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+			values: [title, description, website_url, twitter_url, discord_url, is_discord_open, pre_sale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url]
 		};
 		console.info(`${loggingTag} adding project. query`, insertQuery);
 		const result = outcome = await client.query(insertQuery);
