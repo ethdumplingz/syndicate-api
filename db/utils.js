@@ -9,12 +9,14 @@ const tables = [
 	'alpha'
 ]
 
-const pool = new Pool({
-	connectionString: process.env.PGCONNECTIONSTR,
+const poolOptions = {
+	connectionString: process.env.NODE_ENV === "development" ? process.env.EXTERNALPGCONNECTIONSTR : process.env.INTERNALPGCONNECTIONSTR,
 	ssl:{
 		rejectUnauthorized: false
 	}
-});
+};
+
+const pool = new Pool(poolOptions);
 
 pool.on("error", (err, client) => {
 	const loggingTag = `${dbLoggingTag}[pool error]`;

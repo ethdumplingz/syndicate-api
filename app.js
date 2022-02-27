@@ -1,4 +1,5 @@
 const express = require("express"),
+	cors = require("cors"),
 	bodyParser = require("body-parser"),
 	helmet = require('helmet');
 
@@ -16,6 +17,8 @@ const limiter = rateLimit({
 
 // Apply the rate limiting middleware to all requests
 app.use(limiter);
+
+app.use(cors());
 
 app.use(helmet());//for security purposes
 
