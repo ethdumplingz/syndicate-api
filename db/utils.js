@@ -3,14 +3,15 @@ require("dotenv").config();
 
 const dbLoggingTag = `[db]`;
 
-// console.info(process.env);
+// console.info(`${dbLoggingTag} environment: ${process.env.NODE_ENV}`);
+// console.info(`${dbLoggingTag} process env:`, process.env);
 
 const tables = [
 	'alpha'
 ]
 
 const poolOptions = {
-	connectionString: process.env.NODE_ENV === "development" ? process.env.EXTERNALPGCONNECTIONSTR : process.env.INTERNALPGCONNECTIONSTR,
+	connectionString: process.env.NODE_ENV === "production" ? process.env.INTERNALPGCONNECTIONSTR : process.env.EXTERNALPGCONNECTIONSTR,
 	ssl:{
 		rejectUnauthorized: false
 	}
