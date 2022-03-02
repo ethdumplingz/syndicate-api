@@ -1,7 +1,7 @@
 const express = require('express'),
 	router = express.Router();
 
-const contractUtil = require("../../common/projects/utils");
+const projectsUtil = require("../../common/projects/utils");
 
 router.get("/get/:projectID", async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
@@ -12,7 +12,7 @@ router.get("/get/:projectID", async (req, res, next) => {
 		statusCode = 400;
 	try{
 		const id = req.params.projectID;
-		rj.project = await contractUtil.getSingle({id});
+		rj.project = await projectsUtil.getSingle({id});
 		rj.ok = true;
 		statusCode = 200;
 	} catch(e){
@@ -30,7 +30,7 @@ router.get("/get", async (req, res, next) => {
 		},
 		statusCode = 400;
 	try{
-		rj.projects = await contractUtil.get();
+		rj.projects = await projectsUtil.get();
 		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
@@ -64,7 +64,7 @@ router.post("/add", async (req, res, next) => {
 		statusCode = 400;
 	try{
 		console.info(`${loggingTag} body`, req.body);
-		await contractUtil.insert(req.body);
+		await projectsUtil.insert(req.body);
 		statusCode = 200;
 		rj.ok = true;
 		
@@ -84,7 +84,7 @@ router.post("/edit/", async (req, res, next) => {
 		},
 		statusCode = 400;
 	try{
-		rj.project = await contractUtil.update(req.body);
+		rj.project = await projectsUtil.update(req.body);
 		rj.ok = true;
 		statusCode = 200;
 	} catch(e){
@@ -103,7 +103,7 @@ router.post("/delete/", async (req, res, next) => {
 		},
 		statusCode = 400;
 	try{
-		rj.project = await contractUtil.delete({id:req.body.id});
+		rj.project = await projectsUtil.delete({id:req.body.id});
 		rj.ok = true;
 		statusCode = 200;
 	} catch(e){

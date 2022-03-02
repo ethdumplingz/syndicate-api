@@ -108,21 +108,21 @@ const getSingleProject = async ({id=""} = {}) => {
 		throw new Error("Missing ID of project to retrieve");
 	} else {
 		try {
-			let client;
+			
+			const client = await db.connection.get();
+			const getQuery = {
+				name: `get-project-${id}`,
+				text: `SELECT * FROM ${table} WHERE id = $1`,
+				values: [id]
+			};
+			
+			console.info(`${loggingTag} getting projects...`);
 			try{
-				client = await db.connection.get();
-				const getQuery = {
-					name: `get-project-${id}`,
-					text: `SELECT * FROM ${table} WHERE id = $1`,
-					values: [id]
-				};
-				
-				console.info(`${loggingTag} getting projects...`);
 				const result = await client.query(getQuery);
 				projects = result.rows;
 				console.info(`${loggingTag} got projects:`, projects);
 			} finally {
-				db.connection.release({client});
+				await db.connection.release({client});
 			}
 			
 		} catch(e){
@@ -138,5 +138,5 @@ module.exports = {
 	update: updateProject,
 	delete: deleteProject,
 	get: getProjects,
-	getSingle: getSingleProject
+	getSingle: getSingleProject,
 }
