@@ -3,7 +3,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `projects`;
 
-const insertProject = async ({title = '', description = '', website_url = '', twitter_url = '', discord_url= '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = ""} = {}) => {
+const insertProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[insertProject]`;
 	let outcome;
 	try{
@@ -11,8 +11,8 @@ const insertProject = async ({title = '', description = '', website_url = '', tw
 		// console.info(`${loggingTag} got client`, client);
 		const insertQuery = {
 			name: `add-project`,
-			text: `INSERT INTO ${table}(title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-			values: [title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url]
+			text: `INSERT INTO ${table}(id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+			values: [id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url]
 		};
 		console.info(`${loggingTag} adding project. query`, insertQuery);
 		const result = outcome = await client.query(insertQuery);
@@ -52,7 +52,40 @@ const getProjects = async ({} = {}) => {
 	return projects;
 }
 
+const getSingleProject = async ({id=""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[getSingleProject]`;
+	let projects = [];
+	if(id.length < 1){
+		throw new Error("Missing ID of project to retrieve");
+	} else {
+		try {
+			let client;
+			try{
+				client = await db.connection.get();
+				const getQuery = {
+					name: `get-project-${id}`,
+					text: `SELECT * FROM ${table} WHERE id = $1`,
+					values: [id]
+				};
+				
+				console.info(`${loggingTag} getting projects...`);
+				const result = await client.query(getQuery);
+				projects = result.rows;
+				console.info(`${loggingTag} got projects:`, projects);
+			} finally {
+				db.connection.release({client});
+			}
+			
+		} catch(e){
+			throw e;
+		}
+	}
+	
+	return projects;
+}
+
 module.exports = {
 	insert: insertProject,
-	get: getProjects
+	get: getProjects,
+	getSingle: getSingleProject
 }
