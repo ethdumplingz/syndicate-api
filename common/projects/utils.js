@@ -83,7 +83,7 @@ const getProjects = async ({} = {}) => {
 			client = await db.connection.get();
 			const getQuery = {
 				name: `get-projects`,
-				text: `SELECT * FROM ${table}`,
+				text: `SELECT * FROM ${table} WHERE ts_presale_start >= NOW() ORDER BY ts_presale_start ASC`,
 				values: []
 			};
 			
