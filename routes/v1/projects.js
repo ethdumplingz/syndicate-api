@@ -13,6 +13,7 @@ router.get("/get/:projectID", async (req, res, next) => {
 	try{
 		const id = req.params.projectID;
 		rj.project = await contractUtil.getSingle({id});
+		rj.ok = true;
 		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
@@ -67,6 +68,44 @@ router.post("/add", async (req, res, next) => {
 		statusCode = 200;
 		rj.ok = true;
 		
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+		rj.errors.push(e);
+	}
+	res.json(rj).status(statusCode).end();
+});
+
+router.post("/edit/", async (req, res, next) => {
+	const loggingTag = `[path:${req.path}]`;
+	let rj = {
+			ok: false,
+			project: [],
+			errors: []
+		},
+		statusCode = 400;
+	try{
+		rj.project = await contractUtil.update(req.body);
+		rj.ok = true;
+		statusCode = 200;
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+		rj.errors.push(e);
+	}
+	res.json(rj).status(statusCode).end();
+});
+
+router.post("/delete/", async (req, res, next) => {
+	const loggingTag = `[path:${req.path}]`;
+	let rj = {
+			ok: false,
+			project: [],
+			errors: []
+		},
+		statusCode = 400;
+	try{
+		rj.project = await contractUtil.delete({id:req.body.id});
+		rj.ok = true;
+		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);

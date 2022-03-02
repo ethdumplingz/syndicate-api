@@ -25,9 +25,58 @@ const insertProject = async ({id, title = '', description = '', website_url = ''
 	return outcome;
 }
 
+const updateProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = ""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[updateProject]`;
+	let outcome;
+	try{
+		const client = await db.connection.get();
+		// console.info(`${loggingTag} got client`, client);
+		const updateQuery = {
+			text: `UPDATE ${table} SET title = $2, description = $3, website_url = $4, twitter_url = $5, discord_url = $6, is_discord_open = $7, presale_price = $8, sale_unit = $9, ts_presale_start = $10, ts_presale_end = $11, wl_register_url = $12 WHERE id = $1`,
+			values: [id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url]
+		};
+		
+		console.info(`${loggingTag} updating project. query`, updateQuery);
+		try{
+			const result = outcome = await client.query(updateQuery);
+			console.info(`${loggingTag} project update! result:`, result);
+		} finally {
+			await db.connection.release({client});
+		}
+		
+	} catch(e){
+		// console.error(`${loggingTag} Error:`, e);
+		throw e;
+	}
+	return outcome;
+}
+
+const deleteProject = async ({id = ""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[deleteProject]`;
+	let outcome = false;
+	try{
+		const client = await db.connection.get();
+		const deleteQuery = {
+			text: `DELETE FROM ${table} WHERE id = $1`,
+			values: [id]
+		}
+		try{
+			const result = outcome = await client.query(deleteQuery);
+			console.info(`${loggingTag} project delete! result:`, result);
+		} finally {
+			await db.connection.release({client});
+		}
+		
+	} catch (e){
+		console.error(`${loggingTag} Error:`, e);
+	}
+	return outcome;
+}
+
 const getProjects = async ({} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[getProjects]`;
 	let projects = [];
+	
 	try {
 		let client;
 		try{
@@ -86,6 +135,8 @@ const getSingleProject = async ({id=""} = {}) => {
 
 module.exports = {
 	insert: insertProject,
+	update: updateProject,
+	delete: deleteProject,
 	get: getProjects,
 	getSingle: getSingleProject
 }
