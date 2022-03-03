@@ -92,8 +92,10 @@ router.post(`/projects/stages/add`, async (req, res, next) => {
 		const user = req.body.user,
 			projectID = req.body.project_id,
 			stage = req.body.stage;
+		const result = await usersUtil.projects.stages.add({user, project_id:projectID, stage});
 		
-		rj.ok = await usersUtil.projects.stages.add({user, project_id:projectID, stage});
+		rj.ok = result.rowCount === 1;
+		
 		statusCode = 200;
 		
 	} catch(e){
