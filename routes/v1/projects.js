@@ -7,7 +7,8 @@ router.get("/get/:projectID", async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {
 			ok: false,
-			project: []
+			project: [],
+			errors: []
 		},
 		statusCode = 400;
 	try{
@@ -26,7 +27,8 @@ router.get("/get", async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {
 			ok: false,
-			projects: []
+			projects: [],
+			errors: []
 		},
 		statusCode = 400;
 	try{
@@ -44,7 +46,8 @@ router.get("/:address", (req, res, next) => {
 	let rj = {
 			ok: false,
 			address: '',
-			contracts:[]
+			contracts:[],
+			errors: []
 		},
 		statusCode = 400;
 	try{
@@ -103,7 +106,7 @@ router.post("/delete/", async (req, res, next) => {
 		},
 		statusCode = 400;
 	try{
-		rj.project = await projectsUtil.delete({id:req.body.id});
+		rj.project = await projectsUtil.delete({id: req.body.id});
 		rj.ok = true;
 		statusCode = 200;
 	} catch(e){
