@@ -46,7 +46,8 @@ router.get(`/:user/projects/:projectID/stages/latest`, async (req, res, next) =>
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {
 			ok: false,
-			stage: false
+			stage: false,
+			errors: []
 		},
 		statusCode = 400;
 	try{
@@ -61,6 +62,28 @@ router.get(`/:user/projects/:projectID/stages/latest`, async (req, res, next) =>
 	}
 	res.json(rj).status(statusCode).end();
 });
+
+router.get(`/:user/projects/active`, async (req, res) => {
+	const loggingTag = `[path:${req.path}]`;
+	let rj = {
+			ok: false,
+			projects: [],
+			errors: []
+		},
+		statusCode = 400;
+	try{
+		const user = req.params.user.toLowerCase();
+		rj.ok = true;
+		rj.projects = await usersUtil.projects.get({id: user});
+		statusCode = 200;
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+		rj.errors.push(e);
+	}
+	res.json(rj).status(statusCode).end();
+});
+
+
 
 router.post(`/projects/actions/add`, async (req, res, next) => {
 	let rj = {

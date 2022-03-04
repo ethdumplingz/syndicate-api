@@ -4,6 +4,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 const table = `team`;
 const actionsTable = `user_project_actions`;
 const stagesTable = `user_project_statuses`;
+const userActiveProjectsTable = `user_active_projects`
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[checkIfUserIsPartOfTeam]`;
@@ -120,9 +121,31 @@ const addProjectStage = async ({user, project_id: projectID, stage = ""} = {}) =
 	return outcome;
 }
 
+const getUsersActiveProjects = async ({id:userID=""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[getUsersActiveProjects]`;
+	let projects = [];
+	try{
+		const client = await db.connection.get();
+		// console.info(`${loggingTag} got client`, client);
+		const query = {
+			text: `SELECT * FROM ${userActiveProjectsTable} WHERE user_address = $1`,
+			values: [userID]
+		};
+		console.info(`${loggingTag} adding project stage. query`, query);
+		const result = await client.query(query);
+		projects = result.rows;
+		console.info(`${loggingTag} project stage added! result:`, result);
+		await db.connection.release({client});
+	} catch(e){
+		throw e;
+	}
+	return projects;
+}
+
 module.exports = {
 	isTeam: checkIfUserIsPartOfTeam,
 	projects : {
+		get: getUsersActiveProjects,
 		isFollowing: isFollowingProject,
 		actions : {
 			add: addProjectAction
