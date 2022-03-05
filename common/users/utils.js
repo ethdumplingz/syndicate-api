@@ -4,7 +4,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 const table = `team`;
 const actionsTable = `user_project_actions`;
 const stagesTable = `user_project_statuses`;
-const userActiveProjectsTable = `user_active_projects`
+const userActiveProjectsTable = `user_active_projects_v2`
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[checkIfUserIsPartOfTeam]`;
