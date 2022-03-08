@@ -2,6 +2,7 @@ const db = require("../../db/utils");
 const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `projects`;
+const statusesTable = `user_project_statuses`;
 
 const insertProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[insertProject]`;
@@ -56,11 +57,18 @@ const deleteProject = async ({id = ""} = {}) => {
 	let outcome = false;
 	try{
 		const client = await db.connection.get();
-		const deleteQuery = {
-			text: `DELETE FROM ${table} WHERE id = $1`,
-			values: [id]
-		}
+		
 		try{
+			const deleteProjectStatusesQuery = {
+				text: `DELETE FROM ${statusesTable} where project_id = $1`,
+				values: [id]
+			}
+			await client.query(deleteProjectStatusesQuery);//deleting the associated project statuses because of a foreign key constraint
+			
+			const deleteQuery = {
+				text: `DELETE FROM ${table} WHERE id = $1`,
+				values: [id]
+			}
 			const result = outcome = await client.query(deleteQuery);
 			console.info(`${loggingTag} project delete! result:`, result);
 		} finally {
@@ -69,6 +77,7 @@ const deleteProject = async ({id = ""} = {}) => {
 		
 	} catch (e){
 		console.error(`${loggingTag} Error:`, e);
+		throw e;
 	}
 	return outcome;
 }

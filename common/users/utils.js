@@ -4,7 +4,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 const table = `team`;
 const actionsTable = `user_project_actions`;
 const stagesTable = `user_project_statuses`;
-const userActiveProjectsTable = `user_active_projects_v2`
+const userActiveProjectsTable = `user_active_projects`
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[checkIfUserIsPartOfTeam]`;
@@ -42,8 +42,10 @@ const isFollowingProject = async ({user: address, project_id:projectID} = {}) =>
 		console.info(`${loggingTag} check if user ${address} is an admin...`);
 		try{
 			const result = await client.query(getQuery);
-			console.info(`${loggingTag} result:`, result);
-			console.info(`${loggingTag} action: ${result.rows[0].action} row:`, result.rows[0]);
+			// console.info(`${loggingTag} result:`, result);
+			if(result.rows.length > 0){
+				console.info(`${loggingTag} action: ${result.rows[0].action} row:`, result.rows[0]);
+			}
 			check = result.rows.length > 0 && result.rows[0].action  === "follow";
 			console.info(`${loggingTag} is user following?`, check);
 		} finally {
@@ -55,28 +57,29 @@ const isFollowingProject = async ({user: address, project_id:projectID} = {}) =>
 	return check;
 }
 
-const getLatestProjectStage = async ({user: address, project_id:projectID} = {}) => {
-	const loggingTag = `${baseAppLoggingTag}[getLatestProjectStage]`;
-	let stage = "unknown";
+const getLatestProjectAction = async ({user: address, project_id:projectID} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[getLatestProjectAction]`;
+	let action = "unknown";
 	try{
 		const client = await db.connection.get();
 		const getQuery = {
-			text: `SELECT * FROM ${stagesTable} WHERE user_address = $1 AND project_id = $2 ORDER BY occurred_at DESC LIMIT 1`,
+			text: `SELECT * FROM ${actionsTable} WHERE user_address = $1 AND project_id = $2 ORDER BY occurred_at DESC LIMIT 1`,
 			values: [address, projectID]
 		};
 		console.info(`${loggingTag} get latest stage of user ${address} for project: ${projectID}`);
 		try{
 			const result = await client.query(getQuery);
 			console.info(`${loggingTag} result:`, result);
-			stage = result.rows.length > 0 ? result.rows[0].stage : stage;
-			console.info(`${loggingTag} latest stage`, stage);
+			action = result.rows.length > 0 ? result.rows[0].action : action;
+			console.info(`${loggingTag} latest action`, action);
 		} finally {
 			await db.connection.release({client});
 		}
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
+		throw e;
 	}
-	return stage;
+	return action;
 }
 
 const addProjectAction = async ({user, project_id: projectID, action = ""} = {}) => {
@@ -100,27 +103,6 @@ const addProjectAction = async ({user, project_id: projectID, action = ""} = {})
 	return outcome;
 }
 
-const addProjectStage = async ({user, project_id: projectID, stage = ""} = {}) => {
-	const loggingTag = `${baseAppLoggingTag}[addProjectStage]`;
-	let outcome;
-	try{
-		const client = await db.connection.get();
-		// console.info(`${loggingTag} got client`, client);
-		const insertQuery = {
-			text: `INSERT INTO ${stagesTable} (user_address, project_id, stage) values($1, $2, $3)`,
-			values: [user, projectID, stage]
-		};
-		console.info(`${loggingTag} adding project stage. query`, insertQuery);
-		const result = outcome = await client.query(insertQuery);
-		console.info(`${loggingTag} project stage added! result:`, result);
-		await db.connection.release({client});
-	} catch(e){
-		// console.error(`${loggingTag} Error:`, e);
-		throw e;
-	}
-	return outcome;
-}
-
 const getUsersActiveProjects = async ({id:userID=""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[getUsersActiveProjects]`;
 	let projects = [];
@@ -131,10 +113,11 @@ const getUsersActiveProjects = async ({id:userID=""} = {}) => {
 			text: `SELECT * FROM ${userActiveProjectsTable} WHERE user_address = $1`,
 			values: [userID]
 		};
-		console.info(`${loggingTag} adding project stage. query`, query);
+		console.info(`${loggingTag} Getting user's active projects. query`, query);
 		const result = await client.query(query);
 		projects = result.rows;
-		console.info(`${loggingTag} project stage added! result:`, result);
+		console.info(`${loggingTag} Retrieved user's active projects!`);
+		// console.info(`${loggingTag} Retrieved user's active projects! result:`, result);
 		await db.connection.release({client});
 	} catch(e){
 		throw e;
@@ -148,12 +131,9 @@ module.exports = {
 		get: getUsersActiveProjects,
 		isFollowing: isFollowingProject,
 		actions : {
-			add: addProjectAction
+			add: addProjectAction,
+			latest: getLatestProjectAction
 		},
-		stages : {
-			add: addProjectStage,
-			latest: getLatestProjectStage
-		}
 	}
 	
 }

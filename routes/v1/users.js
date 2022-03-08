@@ -42,7 +42,7 @@ router.get(`/:user/projects/:projectID/following`, async (req, res, next) => {
 	res.json(rj).status(statusCode).end();
 });
 
-router.get(`/:user/projects/:projectID/stages/latest`, async (req, res, next) => {
+router.get(`/:user/projects/:projectID/actions/latest`, async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {
 			ok: false,
@@ -54,7 +54,7 @@ router.get(`/:user/projects/:projectID/stages/latest`, async (req, res, next) =>
 		const user = req.params.user,
 			projectID = req.params.projectID;
 		rj.ok = true;
-		rj.stage = await usersUtil.projects.stages.latest({user,project_id:projectID});
+		rj.stage = await usersUtil.projects.actions.latest({user,project_id:projectID});
 		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
