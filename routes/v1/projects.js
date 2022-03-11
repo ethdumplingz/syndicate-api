@@ -23,6 +23,26 @@ router.get("/get/:projectID", async (req, res, next) => {
 	res.json(rj).status(statusCode).end();
 });
 
+router.get("/get/:projectID/score", async (req, res, next) => {
+    const loggingTag = `[path:${req.path}]`;
+    let rj = {
+            ok: false,
+            score: {},
+            errors: []
+        },
+        statusCode = 400;
+    try {
+        const id = req.params.projectID;
+        rj.score = await projectsUtil.getScore({id});
+        rj.ok = true;
+        statusCode = 200;
+    } catch (e) {
+        console.error(`${loggingTag} Error:`, e);
+        rj.errors.push(e);
+    }
+    res.json(rj).status(statusCode).end();
+});
+
 router.get("/get", async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {

@@ -2,12 +2,13 @@ const express = require('express'),
 	router = express.Router();
 
 const usersUtil = require("../../common/users/utils");
+const projectsUtil = require("../../common/projects/utils");
 
 router.get(`/:user/team/check`, async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {
 			ok: false,
-			
+
 		},
 		statusCode = 400;
 	try{
@@ -31,7 +32,7 @@ router.get(`/:user/projects/:projectID/following`, async (req, res, next) => {
 	try{
 		const user = req.params.user,
 			projectID = req.params.projectID;
-		
+
 		rj.ok = true;
 		rj.is_following = await usersUtil.projects.isFollowing({user,project_id:projectID});
 		statusCode = 200;
@@ -40,6 +41,27 @@ router.get(`/:user/projects/:projectID/following`, async (req, res, next) => {
 		rj.errors.push(e);
 	}
 	res.json(rj).status(statusCode).end();
+});
+
+router.get(`/:user/projects/:projectID/vote/latest`, async (req, res, next) => {
+    const loggingTag = `[path:${req.path}]`;
+    let rj = {
+            ok: false,
+            vote: "N/A",
+            errors: []
+        },
+        statusCode = 400;
+    try {
+        const user = req.params.user,
+            projectID = req.params.projectID;
+        rj.ok = true;
+        rj.vote = await usersUtil.projects.actions.latestVote({user, project_id: projectID});
+        statusCode = 200;
+    } catch (e) {
+        console.error(`${loggingTag} Error:`, e);
+        rj.errors.push(e);
+    }
+    res.json(rj).status(statusCode).end();
 });
 
 router.get(`/:user/projects/:projectID/actions/latest`, async (req, res, next) => {
@@ -84,7 +106,6 @@ router.get(`/:user/projects/active`, async (req, res) => {
 });
 
 
-
 router.post(`/projects/actions/add`, async (req, res, next) => {
 	let rj = {
 			ok: false,
@@ -95,10 +116,10 @@ router.post(`/projects/actions/add`, async (req, res, next) => {
 		const user = req.body.user,
 			projectID = req.body.project_id,
 			action = req.body.action;
-		
+
 		rj.ok = await usersUtil.projects.actions.add({user, project_id:projectID, action});
 		statusCode = 200;
-		
+
 	} catch(e){
 		rj.errors.push(e);
 	}
@@ -116,12 +137,34 @@ router.post(`/projects/stages/add`, async (req, res, next) => {
 			projectID = req.body.project_id,
 			stage = req.body.stage;
 		const result = await usersUtil.projects.stages.add({user, project_id:projectID, stage});
-		
+
 		rj.ok = result.rowCount === 1;
-		
+
 		statusCode = 200;
-		
+
 	} catch(e){
+		rj.errors.push(e);
+	}
+	res.json(rj).status(statusCode).end();
+});
+
+router.post(`/projects/actions/vote`, async (req, res, next) => {
+	let rj = {
+			ok: false,
+			score: {},
+			errors: []
+		},
+		statusCode = 400;
+	try {
+		const user = req.body.user,
+			projectID = req.body.project_id,
+			action = req.body.action;
+
+		rj.ok = await usersUtil.projects.actions.add({user, project_id: projectID, action});
+		rj.score = await projectsUtil.getScore({id: projectID});
+		statusCode = 200;
+
+	} catch (e) {
 		rj.errors.push(e);
 	}
 	res.json(rj).status(statusCode).end();

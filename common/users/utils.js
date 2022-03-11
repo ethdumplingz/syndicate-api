@@ -4,6 +4,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 const table = `team`;
 const actionsTable = `user_project_actions`;
 const userActiveProjectsTable = `user_active_projects`
+const voteTable = `user_project_latest_vote`;
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[checkIfUserIsPartOfTeam]`;
@@ -81,6 +82,31 @@ const getLatestProjectAction = async ({user: address, project_id:projectID} = {}
 	return action;
 }
 
+const getLatestProjectVote = async ({user: address, project_id:projectID} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[getLatestProjectVote]`;
+	let vote = "N/A";
+	try{
+		const client = await db.connection.get();
+		const getQuery = {
+			text: `SELECT * FROM ${voteTable} WHERE user_address = $1 AND project_id = $2`,
+			values: [address, projectID]
+		};
+		console.info(`${loggingTag} get latest vote of user ${address} for project: ${projectID}`);
+		try{
+			const result = await client.query(getQuery);
+			console.info(`${loggingTag} result:`, result);
+			vote = result.rows.length > 0 ? result.rows[0].vote : "N/A";
+			console.info(`${loggingTag} latest vote`, vote);
+		} finally {
+			await db.connection.release({client});
+		}
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+		throw e;
+	}
+	return vote;
+}
+
 const addProjectAction = async ({user, project_id: projectID, action = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[addProjectAction]`;
 	let outcome;
@@ -131,7 +157,8 @@ module.exports = {
 		isFollowing: isFollowingProject,
 		actions : {
 			add: addProjectAction,
-			latest: getLatestProjectAction
+			latest: getLatestProjectAction,
+			latestVote: getLatestProjectVote
 		},
 	}
 	
