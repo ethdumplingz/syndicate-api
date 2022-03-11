@@ -3,7 +3,6 @@ const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `team`;
 const actionsTable = `user_project_actions`;
-const stagesTable = `user_project_statuses`;
 const userActiveProjectsTable = `user_active_projects`
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
