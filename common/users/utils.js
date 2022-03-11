@@ -45,7 +45,7 @@ const isFollowingProject = async ({user: address, project_id:projectID} = {}) =>
 			if(result.rows.length > 0){
 				console.info(`${loggingTag} action: ${result.rows[0].action} row:`, result.rows[0]);
 			}
-			check = result.rows.length > 0 && result.rows[0].action  === "follow";
+			check = result.rows.length > 0 && result.rows[0].action  === "follow";//if out of the last 2 actions above, "follow" is the latest, then they are following
 			console.info(`${loggingTag} is user following?`, check);
 		} finally {
 			await db.connection.release({client});
@@ -109,7 +109,7 @@ const getUsersActiveProjects = async ({id:userID=""} = {}) => {
 		const client = await db.connection.get();
 		// console.info(`${loggingTag} got client`, client);
 		const query = {
-			text: `SELECT * FROM ${userActiveProjectsTable} WHERE user_address = $1 AND ts_presale_end >= current_date - interval '7 day' ORDER BY ts_presale_start`,
+			text: `SELECT * FROM ${userActiveProjectsTable} WHERE user_address = $1 AND (ts_presale_end >= current_date - interval '7 day' OR date_part('epoch', ts_presale_start) = 0) ORDER BY ts_presale_start`,
 			values: [userID]
 		};
 		console.info(`${loggingTag} Getting user's active projects. query`, query);
