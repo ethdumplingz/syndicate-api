@@ -83,9 +83,7 @@ router.get(`/:user/projects/active`, async (req, res) => {
 	res.json(rj).status(statusCode).end();
 });
 
-
-
-router.post(`/projects/actions/add`, async (req, res, next) => {
+router.post(`/projects/follow`, async (req, res, next) => {
 	let rj = {
 			ok: false,
 			errors: []
@@ -93,10 +91,47 @@ router.post(`/projects/actions/add`, async (req, res, next) => {
 		statusCode = 400;
 	try{
 		const user = req.body.user,
-			projectID = req.body.project_id,
-			action = req.body.action;
+			projectID = req.body.project_id;
 		
-		rj.ok = await usersUtil.projects.actions.add({user, project_id:projectID, action});
+		rj.ok = await usersUtil.projects.follow({user, project_id:projectID});
+		statusCode = 200;
+		
+	} catch(e){
+		rj.errors.push(e);
+	}
+	res.json(rj).status(statusCode).end();
+});
+
+router.post(`/projects/unfollow`, async (req, res, next) => {
+	let rj = {
+			ok: false,
+			errors: []
+		},
+		statusCode = 400;
+	try{
+		const user = req.body.user,
+			projectID = req.body.project_id;
+		
+		rj.ok = await usersUtil.projects.unfollow({user, project_id:projectID});
+		statusCode = 200;
+		
+	} catch(e){
+		rj.errors.push(e);
+	}
+	res.json(rj).status(statusCode).end();
+});
+
+
+router.post(`/projects/actions/update`, async (req, res, next) => {
+	let rj = {
+			ok: false,
+			errors: []
+		},
+		statusCode = 400;
+	try{
+		const {user, project_id, action, value} = req.body;
+		
+		rj.ok = await usersUtil.projects.actions.update({user, project_id, action, value});
 		statusCode = 200;
 		
 	} catch(e){

@@ -3,7 +3,8 @@ const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `team`;
 const actionsTable = `user_project_actions`;
-const userActiveProjectsTable = `user_active_projects`
+const userActiveProjectsTable = `user_active_projects`;
+const usersFollowedProjectsTable = `users_followed_projects`;
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[checkIfUserIsPartOfTeam]`;
@@ -102,6 +103,27 @@ const addProjectAction = async ({user, project_id: projectID, action = ""} = {})
 	return outcome;
 }
 
+const removeProjectAction = async ({user, project_id: projectID, action = ""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[removeProjectAction]`;
+	let outcome;
+	try{
+		const client = await db.connection.get();
+		// console.info(`${loggingTag} got client`, client);
+		const insertQuery = {
+			text: `DELETE FROM ${actionsTable} WHERE user_address = $1 AND project_id = $2 AND action = $3`,
+			values: [user, projectID, action]
+		};
+		console.info(`${loggingTag} adding project action. query`, insertQuery);
+		const result = outcome = await client.query(insertQuery);
+		console.info(`${loggingTag} project action added! result:`, result);
+		await db.connection.release({client});
+	} catch(e){
+		// console.error(`${loggingTag} Error:`, e);
+		throw e;
+	}
+	return outcome;
+}
+
 const getUsersActiveProjects = async ({id:userID=""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[getUsersActiveProjects]`;
 	let projects = [];
@@ -124,13 +146,113 @@ const getUsersActiveProjects = async ({id:userID=""} = {}) => {
 	return projects;
 }
 
+const followProject = async ({user = '', project_id = ''} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[followProject]`;
+	let result = false;
+	try{
+		if(user.length < 1){
+			throw new Error('Missing user!');
+		} else if (project_id.length < 1){
+			throw new Error('Missing project!');
+		} else {
+			const client = await db.connection.get();
+			// console.info(`${loggingTag} got client`, client);
+			try{
+				const query = {
+					text: `INSERT INTO ${usersFollowedProjectsTable}(user_address, project_id) values($1, $2)`,
+					values: [user, project_id]
+				};
+				console.info(`${loggingTag} Getting user's active projects. query`, query);
+				const queryResult = await client.query(query);
+				result = queryResult;
+				console.info(`${loggingTag} Retrieved user's active projects!`);
+				// console.info(`${loggingTag} Retrieved user's active projects! result:`, result);
+			} finally {
+				await db.connection.release({client});
+			}
+		}
+	} catch(e){
+		throw e;
+	}
+	return result;
+}
+
+const unfollowProject = async ({user = '', project_id = ''} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[unfollowProject]`;
+	let result = false;
+	try{
+		if(user.length < 1){
+			throw new Error('Missing user!');
+		} else if (project_id.length < 1){
+			throw new Error('Missing project!');
+		} else {
+			const client = await db.connection.get();
+			// console.info(`${loggingTag} got client`, client);
+			try{
+				const query = {
+					text: `DELETE FROM ${usersFollowedProjectsTable} WHERE user_address = $1 AND project_id = $2`,
+					values: [user, project_id]
+				};
+				console.info(`${loggingTag} deleting record in ${usersFollowedProjectsTable} for user: ${user} and project_id: ${project_id}`, query);
+				const queryResult = await client.query(query);
+				result = queryResult;
+				console.info(`${loggingTag} Retrieved user's active projects!`);
+				// console.info(`${loggingTag} Retrieved user's active projects! result:`, result);
+			} finally {
+				await db.connection.release({client});
+			}
+		}
+	} catch(e){
+		throw e;
+	}
+	return result;
+}
+
+const updateUserProject = async ({user = '', project_id = '', action = '', value} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[updateUserProject]`;
+	let result = false;
+	try{
+		if(user.length < 1){
+			throw new Error('Missing user!');
+		} else if (project_id.length < 1){
+			throw new Error('Missing project!');
+		} else {
+			const client = await db.connection.get();
+			// console.info(`${loggingTag} got client`, client);
+			try{
+				const query = {
+					text: `UPDATE ${usersFollowedProjectsTable} SET ${action} = $1 WHERE user_address = $2 AND project_id = $3`,
+					values: [value, user, project_id]
+				};
+				console.info(`${loggingTag} updating record in ${usersFollowedProjectsTable} for user: ${user} and project_id: ${project_id}`, query);
+				const queryResult = await client.query(query);
+				console.info(`${loggingTag} query result`, queryResult);
+				result = queryResult;
+				console.info(`${loggingTag} Retrieved user's active projects!`);
+				// console.info(`${loggingTag} Retrieved user's active projects! result:`, result);
+			} catch(e){
+				throw e;
+			} finally {
+				await db.connection.release({client});
+			}
+		}
+	} catch(e){
+		throw e;
+	}
+	return result;
+}
+
 module.exports = {
 	isTeam: checkIfUserIsPartOfTeam,
 	projects : {
 		get: getUsersActiveProjects,
+		follow: followProject,
+		unfollow: unfollowProject,
 		isFollowing: isFollowingProject,
 		actions : {
+			update: updateUserProject,
 			add: addProjectAction,
+			remove: removeProjectAction,
 			latest: getLatestProjectAction
 		},
 	}
