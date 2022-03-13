@@ -43,19 +43,19 @@ router.get(`/:user/projects/:projectID/following`, async (req, res, next) => {
 	res.json(rj).status(statusCode).end();
 });
 
-router.get(`/:user/projects/:projectID/vote/latest`, async (req, res, next) => {
+router.get(`/:user/projects/:projectID/vote`, async (req, res, next) => {
     const loggingTag = `[path:${req.path}]`;
     let rj = {
             ok: false,
-            vote: "N/A",
+            vote: 0,
             errors: []
         },
         statusCode = 400;
     try {
         const user = req.params.user,
-            projectID = req.params.projectID;
+			project_id = req.params.projectID;
         rj.ok = true;
-        rj.vote = await usersUtil.projects.actions.latestVote({user, project_id: projectID});
+        rj.vote = await usersUtil.projects.actions.latestVote({user, project_id});
         statusCode = 200;
     } catch (e) {
         console.error(`${loggingTag} Error:`, e);
@@ -184,7 +184,7 @@ router.post(`/projects/stages/add`, async (req, res, next) => {
 	res.json(rj).status(statusCode).end();
 });
 
-router.post(`/projects/actions/vote`, async (req, res, next) => {
+router.post(`/projects/vote`, async (req, res, next) => {
 	let rj = {
 			ok: false,
 			score: {},
@@ -192,12 +192,10 @@ router.post(`/projects/actions/vote`, async (req, res, next) => {
 		},
 		statusCode = 400;
 	try {
-		const user = req.body.user,
-			projectID = req.body.project_id,
-			action = req.body.action;
+		const {user, project_id, vote} = req.body;
 
-		rj.ok = await usersUtil.projects.actions.add({user, project_id: projectID, action});
-		rj.score = await projectsUtil.getScore({id: projectID});
+		rj.ok = await usersUtil.projects.actions.vote({user, project_id, vote});
+		rj.score = await projectsUtil.getScore({id: project_id});
 		statusCode = 200;
 
 	} catch (e) {
