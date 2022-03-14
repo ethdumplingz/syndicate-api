@@ -3,6 +3,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `projects`;
 const statusesTable = `user_project_statuses`;
+const scoreTable = `project_user_scores`;
 
 const insertProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[insertProject]`;
@@ -142,10 +143,49 @@ const getSingleProject = async ({id=""} = {}) => {
 	return projects;
 }
 
+const getProjectScore = async ({id = ""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[getProjectScore]`;
+	let score = {};
+	if (id.length < 1) {
+		throw new Error("Missing ID of project to retrieve");
+	} else {
+		try {
+			const client = await db.connection.get();
+			const getQuery = {
+				name: `get-score-${id}`,
+				text: `SELECT *
+                       FROM ${scoreTable}
+                       WHERE project_id = $1`,
+				values: [id]
+			};
+
+			console.info(`${loggingTag} getting project score...`);
+			try {
+				const result = await client.query(getQuery);
+				score = result.rows.length > 0 ? result.rows[0] : {
+					project_id: id,
+					score: 0,
+					upvotes: 0,
+					downvotes: 0
+				};
+				console.info(`${loggingTag} got project score:`, score);
+			} finally {
+				await db.connection.release({client});
+			}
+
+		} catch (e) {
+			throw e;
+		}
+	}
+
+	return score;
+}
+
 module.exports = {
-	insert: insertProject,
-	update: updateProject,
-	delete: deleteProject,
-	get: getProjects,
-	getSingle: getSingleProject,
+    insert: insertProject,
+    update: updateProject,
+    delete: deleteProject,
+    get: getProjects,
+    getSingle: getSingleProject,
+    getScore: getProjectScore,
 }

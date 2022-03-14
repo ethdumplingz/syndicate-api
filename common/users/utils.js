@@ -5,6 +5,7 @@ const table = `team`;
 const actionsTable = `user_project_actions`;
 const userActiveProjectsTable = `user_active_projects`;
 const usersFollowedProjectsTable = `users_followed_projects`;
+const userProjectVotesTable = `user_project_votes`;
 
 const checkIfUserIsPartOfTeam = async ({user:address = ""} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[checkIfUserIsPartOfTeam]`;
@@ -80,6 +81,34 @@ const getLatestProjectAction = async ({user: address, project_id:projectID} = {}
 		throw e;
 	}
 	return action;
+}
+
+const getUserProjectVote = async ({user: address, project_id: projectID} = {}) => {
+    const loggingTag = `${baseAppLoggingTag}[getLatestProjectVote]`;
+    let vote = 0;
+    try {
+        const client = await db.connection.get();
+        const getQuery = {
+            text: `SELECT vote
+                   FROM ${userProjectVotesTable}
+                   WHERE user_address = $1
+                     AND project_id = $2`,
+            values: [address, projectID]
+        };
+        console.info(`${loggingTag} get latest vote of user ${address} for project: ${projectID}`);
+        try {
+            const result = await client.query(getQuery);
+            console.info(`${loggingTag} result:`, result);
+            vote = result.rows.length > 0 ? result.rows[0].vote : 0;
+            console.info(`${loggingTag} latest vote`, vote);
+        } finally {
+            await db.connection.release({client});
+        }
+    } catch (e) {
+        console.error(`${loggingTag} Error:`, e);
+        throw e;
+    }
+    return vote;
 }
 
 const addProjectAction = async ({user, project_id: projectID, action = ""} = {}) => {
@@ -242,19 +271,55 @@ const updateUserProject = async ({user = '', project_id = '', action = '', value
 	return result;
 }
 
+const addOrUpdateVote = async ({user = '', project_id = '', vote = 0} = {}) => {
+    const loggingTag = `${baseAppLoggingTag}[addOrUpdateVote]`;
+    let result = 0;
+    try {
+        if (user.length < 1) {
+            throw new Error('Missing user!');
+        } else if (project_id.length < 1) {
+            throw new Error('Missing project!');
+        } else {
+            const client = await db.connection.get();
+            try {
+                const query = {
+                    text: `INSERT INTO ${userProjectVotesTable} (user_address, project_id, vote)
+                           VALUES ($1, $2, $3) 
+                           ON CONFLICT (user_address, project_id)
+                           DO UPDATE SET vote = $3`,
+                    values: [user, project_id, vote]
+                };
+                console.info(`${loggingTag} updating record in ${userProjectVotesTable} for user: ${user} and project_id: ${project_id}`, query);
+                const queryResult = await client.query(query);
+                console.info(`${loggingTag} query result`, queryResult);
+                result = queryResult;
+                console.info(`${loggingTag} updated user's vote for project!`);
+            } finally {
+                await db.connection.release({client});
+            }
+        }
+    } catch (e) {
+        console.info(e);
+        throw e;
+    }
+    return result;
+}
+
 module.exports = {
-	isTeam: checkIfUserIsPartOfTeam,
-	projects : {
-		get: getUsersActiveProjects,
-		follow: followProject,
-		unfollow: unfollowProject,
-		isFollowing: isFollowingProject,
-		actions : {
-			update: updateUserProject,
-			add: addProjectAction,
-			remove: removeProjectAction,
-			latest: getLatestProjectAction
-		},
-	}
-	
+    isTeam: checkIfUserIsPartOfTeam,
+    projects: {
+        get: getUsersActiveProjects,
+        follow: followProject,
+        unfollow: unfollowProject,
+        isFollowing: isFollowingProject,
+        actions: {
+            update: updateUserProject,
+            add: addProjectAction,
+            remove: removeProjectAction,
+            latest: getLatestProjectAction,
+            latestVote: getUserProjectVote,
+            vote: addOrUpdateVote
+        },
+    }
+
 }
