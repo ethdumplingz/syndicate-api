@@ -37,17 +37,17 @@ const isFollowingProject = async ({user: address, project_id:projectID} = {}) =>
 	try{
 		const client = await db.connection.get();
 		const getQuery = {
-			text: `SELECT * FROM ${actionsTable} WHERE user_address = $1 AND project_id = $2 AND action IN ('follow', 'unfollow') ORDER BY occurred_at DESC LIMIT 1`,
+			text: `SELECT * FROM ${usersFollowedProjectsTable} WHERE user_address = $1 AND project_id = $2 `,
 			values: [address, projectID]
 		};
 		console.info(`${loggingTag} check if user ${address} is an admin...`);
 		try{
 			const result = await client.query(getQuery);
-			// console.info(`${loggingTag} result:`, result);
+			console.info(`${loggingTag} result:`, result);
 			if(result.rows.length > 0){
-				console.info(`${loggingTag} action: ${result.rows[0].action} row:`, result.rows[0]);
+				console.info(`${loggingTag} row:`, result.rows[0]);
 			}
-			check = result.rows.length > 0 && result.rows[0].action  === "follow";//if out of the last 2 actions above, "follow" is the latest, then they are following
+			check = result.rows.length > 0;//if out of the last 2 actions above, "follow" is the latest, then they are following
 			console.info(`${loggingTag} is user following?`, check);
 		} finally {
 			await db.connection.release({client});

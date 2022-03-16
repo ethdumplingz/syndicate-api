@@ -10,7 +10,7 @@ const rateLimit = require('express-rate-limit');
 
 const limiter = rateLimit({
 	windowMs: 60 * 1000, // 1 minute
-	max: 500, // Limit each IP to 500 requests per `window` (here, per 1 minute)
+	max: 5000, // Limit each IP to 500 requests per `window` (here, per 1 minute)
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 })
@@ -45,6 +45,10 @@ const html = `
           disableForReducedMotion: true
         });
       }, 500);
+			
+			
+			
+			
     </script>
     <style>
       @import url("https://p.typekit.net/p.css?s=1&k=vnd5zic&ht=tk&f=39475.39476.39477.39478.39479.39480.39481.39482&a=18673890&app=typekit&e=css");
