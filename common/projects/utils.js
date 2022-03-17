@@ -4,6 +4,7 @@ const baseAppLoggingTag = `[PROJECTS]`;
 const table = `projects`;
 const statusesTable = `user_project_statuses`;
 const scoreTable = `project_user_scores`;
+const fullInfoTable = `project_full_info_view`;
 
 const insertProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', role_acquisition_url = '', wallet_submission_url = '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[insertProject]`;
@@ -83,7 +84,7 @@ const deleteProject = async ({id = ""} = {}) => {
 	return outcome;
 }
 
-const getProjects = async ({} = {}) => {
+const getProjects = async ({user = ''} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[getProjects]`;
 	let projects = [];
 	
@@ -92,9 +93,9 @@ const getProjects = async ({} = {}) => {
 		try{
 			client = await db.connection.get();
 			const getQuery = {
-				name: `get-projects`,
-				text: `SELECT * FROM ${table} WHERE ts_presale_start > NOW() OR date_part('epoch', ts_presale_start) = 0 ORDER BY ts_presale_start ASC`,
-				values: []
+				name: `get-projects-for-user`,
+				text: `SELECT p.*, CASE WHEN ufp.user_address IS NOT NULL THEN true ELSE false END AS is_following, ufp.user_address, ufp.raffle_won, ufp.role_assigned, ufp.wallet_added, ufp.minted, CASE WHEN upv.vote IS NOT NULL THEN upv.vote ELSE 0 END AS vote FROM ${fullInfoTable} p LEFT JOIN (SELECT * FROM users_followed_projects WHERE user_address = $1) ufp ON p.id = ufp.project_id LEFT JOIN (SELECT * FROM user_project_votes WHERE user_address = $1) upv ON p.id = upv.project_id WHERE p.ts_presale_start > NOW() OR date_part('epoch', p.ts_presale_start) = 0 ORDER BY p.ts_presale_start ASC`,
+				values: [user]
 			};
 			
 			console.info(`${loggingTag} getting projects...`);

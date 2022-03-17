@@ -292,7 +292,7 @@ const addOrUpdateVote = async ({user = '', project_id = '', vote = 0} = {}) => {
                 console.info(`${loggingTag} updating record in ${userProjectVotesTable} for user: ${user} and project_id: ${project_id}`, query);
                 const queryResult = await client.query(query);
                 console.info(`${loggingTag} query result`, queryResult);
-                result = queryResult;
+                result = queryResult.rowCount > 0;
                 console.info(`${loggingTag} updated user's vote for project!`);
             } finally {
                 await db.connection.release({client});

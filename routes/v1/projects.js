@@ -51,8 +51,10 @@ router.get("/get", async (req, res, next) => {
 			errors: []
 		},
 		statusCode = 400;
+	// console.info(`${loggingTag} req.query`);
 	try{
-		rj.projects = await projectsUtil.get();
+		const user = req.query.user;
+		rj.projects = await projectsUtil.get({user});
 		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
