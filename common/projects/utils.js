@@ -94,7 +94,14 @@ const getProjects = async ({user = ''} = {}) => {
 			client = await db.connection.get();
 			const getQuery = {
 				name: `get-projects-for-user`,
-				text: `SELECT p.*, CASE WHEN ufp.user_address IS NOT NULL THEN true ELSE false END AS is_following, ufp.user_address, ufp.raffle_won, ufp.role_assigned, ufp.wallet_added, ufp.minted, CASE WHEN upv.vote IS NOT NULL THEN upv.vote ELSE 0 END AS vote FROM ${fullInfoTable} p LEFT JOIN (SELECT * FROM users_followed_projects WHERE user_address = $1) ufp ON p.id = ufp.project_id LEFT JOIN (SELECT * FROM user_project_votes WHERE user_address = $1) upv ON p.id = upv.project_id WHERE p.ts_presale_start > NOW() OR date_part('epoch', p.ts_presale_start) = 0 ORDER BY p.ts_presale_start ASC`,
+				text: `SELECT p.id, p.title, p.presale_price, p.public_price, p.ts_presale_start, p.max_supply, p.website_url, p.website_url, p.twitter_url, p.discord_url, p.wl_register_url, p.score, p.upvotes, p.downvotes,
+							  CASE WHEN ufp.user_address IS NOT NULL THEN true ELSE false END AS is_following,
+							  CASE WHEN upv.vote IS NOT NULL THEN upv.vote ELSE 0 END AS vote
+					   FROM ${fullInfoTable} p
+							LEFT JOIN users_followed_projects ufp ON ufp.project_id = p.id AND ufp.user_address = $1
+							LEFT JOIN user_project_votes upv ON upv.project_id = p.id AND upv.user_address = $1
+					   WHERE p.ts_presale_start > NOW() OR date_part('epoch', p.ts_presale_start) = 0
+					   ORDER BY p.ts_presale_start`,
 				values: [user]
 			};
 			
