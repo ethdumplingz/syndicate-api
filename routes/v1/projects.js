@@ -173,4 +173,56 @@ router.post(["/hide/", "/show/"], async (req, res, next) => {
 	res.json(rj).status(statusCode).end();
 });
 
+//modules added for csv upload
+const multer = require("multer"),
+	csv = require("fast-csv"),
+	fs = require("fs"),
+	upload = multer({dest:"tmp/csv/"});
+
+router.post("/bulk/add/", upload.single("file"), (req, res) => {
+	let rj = {
+		ok: false,
+		rows_added: 0,
+		errors:[]
+	},
+		statusCode = 400;
+	const loggingTag = `[path:${req.path}]`;
+	console.info(`${loggingTag} here!!!`);
+	const fileRows = [];
+	try{
+		console.info(`${loggingTag} file path:`);
+		fs.createReadStream(req.file.path)
+			.pipe(csv.parse({headers:true}))
+			.on("data", (row) => {
+				fileRows.push(row);
+			})
+			.on("error", (e) => {
+				rj.errors.push(e);
+				console.error(`${loggingTag} error occurred`, e);
+			})
+			.on("end", (rowCount) => {
+				console.info(`${loggingTag} num rows processed: ${rowCount}`);
+				console.info(`${loggingTag} File rows:`, fileRows);
+				if(rj.errors.length < 1){
+					rj.ok = true;
+					statusCode = 200;
+				}
+				
+				try{
+					fs.unlinkSync(req.file.path);
+					console.info(`${loggingTag} temp file deleted!`);
+				} catch(e){
+					rj.errors.push(e);
+					console.error(`${loggingTag} Error:`, e);
+				}
+				res.status(statusCode).json(rj).end();
+			});
+	} catch(e){
+		rj.errors.push(e);
+		console.error(`${loggingTag} Error:`, e);
+		res.status(statusCode).json(rj).end();
+	}
+	
+});
+
 module.exports = router;
