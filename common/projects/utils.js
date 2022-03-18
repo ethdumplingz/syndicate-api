@@ -30,7 +30,7 @@ const insertProject = async ({id, title = '', description = '', website_url = ''
 
 const updateProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', role_acquisition_url='', wallet_submission_url, is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[updateProject]`;
-	let outcome;
+	let outcome = false;
 	try{
 		const client = await db.connection.get();
 		// console.info(`${loggingTag} got client`, client);
@@ -79,6 +79,52 @@ const deleteProject = async ({id = ""} = {}) => {
 		
 	} catch (e){
 		console.error(`${loggingTag} Error:`, e);
+		throw e;
+	}
+	return outcome;
+}
+
+const hideProject = async ({id} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[hideProject]`;
+	let outcome = false;
+	try{
+		outcome = await updateProjectVisibility({id, is_active: false});
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+	}
+	return outcome;
+}
+const showProject = async ({id} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[showProject]`;
+	let outcome = false;
+	try{
+		outcome = await updateProjectVisibility({id, is_active: true});
+	} catch(e){
+		console.error(`${loggingTag} Error:`, e);
+	}
+	return outcome;
+}
+
+const updateProjectVisibility = async ({id, is_active:isActive = false} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[updateProjectVisibility]`;
+	let outcome = false;
+	try{
+		const client = await db.connection.get();
+		// console.info(`${loggingTag} got client`, client);
+		const updateQuery = {
+			text: `UPDATE ${table} SET is_active = $2 WHERE id = $1`,
+			values: [id, isActive]
+		};
+		console.info(`${loggingTag} updating project is_active to ${isActive}. query`, updateQuery);
+		try{
+			const result = outcome = await client.query(updateQuery);
+			console.info(`${loggingTag} project hidden! result:`, result);
+		} finally {
+			await db.connection.release({client});
+		}
+		
+	} catch(e){
+		// console.error(`${loggingTag} Error:`, e);
 		throw e;
 	}
 	return outcome;
@@ -186,6 +232,8 @@ module.exports = {
     insert: insertProject,
     update: updateProject,
     delete: deleteProject,
+		hide: hideProject,
+		show: showProject,
     get: getProjects,
     getSingle: getSingleProject,
     getScore: getProjectScore,
