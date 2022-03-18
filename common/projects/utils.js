@@ -6,7 +6,7 @@ const statusesTable = `user_project_statuses`;
 const scoreTable = `project_user_scores`;
 const fullInfoTable = `project_full_info_view`;
 
-const insertProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', role_acquisition_url = '', wallet_submission_url = '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
+const insertProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', role_acquisition_url = '', wallet_submission_url = '', is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, ts_public_sale= 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[insertProject]`;
 	let outcome;
 	try{
@@ -14,8 +14,8 @@ const insertProject = async ({id, title = '', description = '', website_url = ''
 		// console.info(`${loggingTag} got client`, client);
 		const insertQuery = {
 			name: `add-project`,
-			text: `INSERT INTO ${table}(id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url, max_supply, max_per_transaction, max_per_wallet, role_acquisition_url, wallet_submission_url) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-			values: [id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url, max_supply, max_per_transaction, max_per_wallet, role_acquisition_url, wallet_submission_url]
+			text: `INSERT INTO ${table}(id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, ts_public_sale, wl_register_url, max_supply, max_per_transaction, max_per_wallet, role_acquisition_url, wallet_submission_url) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+			values: [id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, ts_public_sale, wl_register_url, max_supply, max_per_transaction, max_per_wallet, role_acquisition_url, wallet_submission_url]
 		};
 		console.info(`${loggingTag} adding project. query`, insertQuery);
 		const result = outcome = await client.query(insertQuery);
@@ -28,15 +28,15 @@ const insertProject = async ({id, title = '', description = '', website_url = ''
 	return outcome;
 }
 
-const updateProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', role_acquisition_url='', wallet_submission_url, is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
+const updateProject = async ({id, title = '', description = '', website_url = '', twitter_url = '', discord_url= '', role_acquisition_url='', wallet_submission_url, is_discord_open= true, presale_price = 0, sale_unit = "ETH", ts_presale_start = 0, ts_presale_end = 0, ts_public_sale = 0, wl_register_url = "", max_supply = 0, max_per_transaction = 0, max_per_wallet = 0} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[updateProject]`;
 	let outcome = false;
 	try{
 		const client = await db.connection.get();
 		// console.info(`${loggingTag} got client`, client);
 		const updateQuery = {
-			text: `UPDATE ${table} SET title = $2, description = $3, website_url = $4, twitter_url = $5, discord_url = $6, is_discord_open = $7, presale_price = $8, sale_unit = $9, ts_presale_start = $10, ts_presale_end = $11, wl_register_url = $12, max_supply = $13, max_per_transaction = $14, max_per_wallet = $15, role_acquisition_url = $16, wallet_submission_url = $17 WHERE id = $1`,
-			values: [id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, wl_register_url, max_supply, max_per_transaction, max_per_wallet, role_acquisition_url, wallet_submission_url]
+			text: `UPDATE ${table} SET title = $2, description = $3, website_url = $4, twitter_url = $5, discord_url = $6, is_discord_open = $7, presale_price = $8, sale_unit = $9, ts_presale_start = $10, ts_presale_end = $11, ts_public_sale = $12, wl_register_url = $13, max_supply = $14, max_per_transaction = $15, max_per_wallet = $16, role_acquisition_url = $17, wallet_submission_url = $18 WHERE id = $1`,
+			values: [id, title, description, website_url, twitter_url, discord_url, is_discord_open, presale_price, sale_unit, ts_presale_start, ts_presale_end, ts_public_sale, wl_register_url, max_supply, max_per_transaction, max_per_wallet, role_acquisition_url, wallet_submission_url]
 		};
 		
 		console.info(`${loggingTag} updating project. query`, updateQuery);
