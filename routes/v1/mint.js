@@ -12,8 +12,10 @@ router.get("/status", (req, res) => {
 	
 	try{
 		rj.ok = true;
-		const tsMintLiveInMs = 1647814380000
+		const tsMintLiveInMs = 1647814380000;
+		// const tsMintLiveInMs = 10;
 		rj.live = new Date().getTime() > tsMintLiveInMs;
+		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
 	}
