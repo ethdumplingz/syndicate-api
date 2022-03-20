@@ -405,7 +405,8 @@ router.get("/status", (req, res) => {
 	try{
 		const {wa:address} = req.query;
 		rj.ok = true;
-		const tsMintLiveInMs = 1647814380000,
+		// const tsMintLiveInMs = 1647814380000,
+		const tsMintLiveInMs = 1647814980000,
 			tsEarlyOGMintLiveInMs = tsMintLiveInMs - (5 * 60 * 1000);//5 minute head start;
 			// tsEarlyOGMintLiveInMs = tsMintLiveInMs - (3 * 24 * 60 * 60 * 1000);//3 days for testing purposes
 		// const tsMintLiveInMs = 10;
