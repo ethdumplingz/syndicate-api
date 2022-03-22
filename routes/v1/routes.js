@@ -11,4 +11,7 @@ router.use('/users', usersRouter);
 const mintRouter = require('./mint');
 router.use('/mint', mintRouter);
 
+const collectionsRouter = require('./collections');
+router.use('/collections', collectionsRouter);
+
 module.exports = router;
