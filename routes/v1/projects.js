@@ -21,7 +21,7 @@ router.get("/get/:projectID", async (req, res, next) => {
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);
 	}
-	res.json(rj).status(statusCode).end();
+	res.status(statusCode).json(rj).end();
 });
 
 router.get("/get/:projectID/score", async (req, res, next) => {
@@ -41,7 +41,7 @@ router.get("/get/:projectID/score", async (req, res, next) => {
         console.error(`${loggingTag} Error:`, e);
         rj.errors.push(e);
     }
-    res.json(rj).status(statusCode).end();
+    res.status(statusCode).json(rj).end();
 });
 
 router.get("/get", async (req, res, next) => {
@@ -62,7 +62,7 @@ router.get("/get", async (req, res, next) => {
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);
 	}
-	res.json(rj).status(statusCode).end();
+	res.status(statusCode).json(rj).end();
 });
 
 router.get("/:address", (req, res, next) => {
@@ -76,7 +76,7 @@ router.get("/:address", (req, res, next) => {
 		statusCode = 400;
 	try{
 		rj.address = req.params.address;
-		res.json(rj).status(statusCode).end();
+		res.status(statusCode).json(rj).end();
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
 	}
@@ -99,7 +99,7 @@ router.post("/add", async (req, res, next) => {
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);
 	}
-	res.json(rj).status(statusCode).end();
+	res.status(statusCode).json(rj).end();
 });
 
 router.post("/edit/", async (req, res, next) => {
@@ -118,7 +118,7 @@ router.post("/edit/", async (req, res, next) => {
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);
 	}
-	res.json(rj).status(statusCode).end();
+	res.status(statusCode).json(rj).end();
 });
 
 router.post("/delete/", async (req, res, next) => {
@@ -141,7 +141,7 @@ router.post("/delete/", async (req, res, next) => {
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);
 	}
-	res.json(rj).status(statusCode).end();
+	res.status(statusCode).json(rj).end();
 });
 
 router.post(["/hide/", "/show/"], async (req, res, next) => {
@@ -170,7 +170,7 @@ router.post(["/hide/", "/show/"], async (req, res, next) => {
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);
 	}
-	res.json(rj).status(statusCode).end();
+	res.status(statusCode).json(rj).end();
 });
 
 //modules added for csv upload
