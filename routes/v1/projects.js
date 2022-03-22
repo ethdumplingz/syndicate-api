@@ -175,11 +175,11 @@ router.post(["/hide/", "/show/"], async (req, res, next) => {
 
 //modules added for csv upload
 const multer = require("multer"),
-	csv = require("fast-csv"),
 	fs = require("fs"),
-	upload = multer({dest:"tmp/csv/"});
-const db = require("../../db/utils");
-const copyFrom = require('pg-copy-streams').from;
+	readline = require('readline'),
+	upload = multer({dest:"tmp/csv/"}),
+	db = require("../../db/utils"),
+	copyFrom = require('pg-copy-streams').from;
 
 router.post("/bulk/add/", upload.single("file"), async (req, res) => {
 	let rj = {
@@ -190,13 +190,23 @@ router.post("/bulk/add/", upload.single("file"), async (req, res) => {
 		statusCode = 400;
 
 	const loggingTag = `[path:${req.path}]`;
-	console.info(`${loggingTag} here!!!`);
+	console.info(`${loggingTag} Upload projects from csv!`);
 	try {
 		console.info(`${loggingTag} file path:`);
 
 		const client = await db.connection.get();
 
-		const dbStream = client.query(copyFrom(`COPY projects FROM STDIN CSV HEADER`))
+		let inputStream = fs.createReadStream(req.file.path);
+		const reader = readline.createInterface({ input: inputStream });
+		const header = await new Promise((resolve) => {
+			reader.on('line', (line) => {
+				reader.close();
+				resolve(line);
+			});
+		});
+		console.info(`Importing csv with header: ${header}`);
+
+		const dbStream = client.query(copyFrom(`COPY projects (${header}) FROM STDIN CSV HEADER`))
 			.on('error', (e) => {
 				rj.errors.push(e);
 				console.error(`${loggingTag} error occurred`, e);
