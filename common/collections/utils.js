@@ -56,7 +56,7 @@ const upsertCollectionIntoDB = async ({collection} = {}) => {
 					const collectionID = collection._id;
 					const	dbCollection = await db.collection.init({client, collection:{name: db.collection.names.collections}});
 					console.info(`${loggingTag} inserting a project w/ ID ${collectionID} into the db...`);
-					let result = await dbCollection.upsert({
+					let result = await db.collection.upsert({
 						id: collectionID,
 						document: collection,
 						collection: dbCollection
