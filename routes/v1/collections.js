@@ -3,7 +3,7 @@ const express = require('express'),
 
 const collectionUtils = require("../../common/collections/utils");
 
-router.get(`/test`, async (req, res, next) => {
+router.get(`/get/:id`, async (req, res, next) => {
 	const loggingTag = `[path: ${req.path}]`;
 	let rj = {
 		ok: false,
@@ -12,9 +12,19 @@ router.get(`/test`, async (req, res, next) => {
 		statusCode = 400;
 	
 	try{
-		const result = await collectionUtils.get();
-		rj.ok = true;
-		statusCode = 200;
+		const {id} = req.params;
+		try{
+			const result = await collectionUtils.get({id});
+			if(result){
+				rj.ok = true;
+				statusCode = 200;
+			} else {//no error, collection just wasn't found in our db.   we should try to fetch it from the OS API
+				collectionUtils.fetch({id});
+			}
+		} catch(e){
+			rj.errors.push(e);
+		}
+		
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
 		rj.errors.push(e);

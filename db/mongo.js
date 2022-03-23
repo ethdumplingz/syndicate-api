@@ -9,7 +9,7 @@ const url = process.env.MONGO_CONNECT_URL;
 
 const dbName = `syndicate`,
 	tableNames = {
-		items: `collections`
+		collections: `collections`
 	}
 
 // Database Name
