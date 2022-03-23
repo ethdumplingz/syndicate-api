@@ -25,6 +25,8 @@ router.get(`/get/:id`, async (req, res, next) => {
 			} else {//no error, collection just wasn't found in our db.   we should try to fetch it from the OS API
 				// collectionsUtils.fetch({id});
 				//add an item to the queue
+				console.info(`${loggingTag}[id:${id}] Adding item to collections queue to fetch info from OS`);
+				
 				collectionsQueue.add({id});
 			}
 		} catch(e){
