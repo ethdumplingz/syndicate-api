@@ -5,6 +5,10 @@ const Queue = require("bull");
 const collectionsQueue = new Queue('collections', process.env.INTERNALREDISCONNECTIONSTR);
 const collectionsUtils = require("../../common/collections/utils");
 
+function getRandomInt(max) {
+	return Math.floor(Math.random() * max);
+}
+
 router.get(`/get/:id`, async (req, res, next) => {
 	const loggingTag = `[path: ${req.path}]`;
 	let rj = {
@@ -25,9 +29,10 @@ router.get(`/get/:id`, async (req, res, next) => {
 			} else {//no error, collection just wasn't found in our db.   we should try to fetch it from the OS API
 				// collectionsUtils.fetch({id});
 				//add an item to the queue
-				console.info(`${loggingTag}[id:${id}] Adding item to collections queue to fetch info from OS`);
+				const queueDelay = getRandomInt(10000);
+				console.info(`${loggingTag}[id:${id}] Adding item to collections queue (w/ a delay of ${queueDelay}ms) to fetch info from OS`);
 				
-				collectionsQueue.add({id});
+				collectionsQueue.add({id}, {delay: queueDelay});//queue this with a delay from
 			}
 		} catch(e){
 			rj.errors.push(e);
