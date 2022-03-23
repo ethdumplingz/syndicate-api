@@ -30,7 +30,10 @@ const getCollectionFromDB = async ({address = ''} = {}) => {
 				
 			} catch(e){
 				throw e;
+			} finally {
+				db.close({client});
 			}
+			
 		} catch(e){
 			throw e;
 		}
