@@ -106,7 +106,7 @@ const getCollectionContractInfo = async ({address=""}) => {
 	return info;
 }
 
-const getCollectionStats = async ({slug = "", collection:collectionInfo = {}, address = ''}) => {
+const getCollectionStats = async ({slug = ""} = {}) => {
 	const loggingTag = `[getCollectionStats]`;
 	let stats;
 	try{
