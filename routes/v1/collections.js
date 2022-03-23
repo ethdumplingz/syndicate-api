@@ -7,6 +7,7 @@ router.get(`/get/:id`, async (req, res, next) => {
 	const loggingTag = `[path: ${req.path}]`;
 	let rj = {
 		ok: false,
+		collection: false,
 		errors: []
 	},
 		statusCode = 400;
@@ -16,6 +17,7 @@ router.get(`/get/:id`, async (req, res, next) => {
 		try{
 			const result = await collectionUtils.get({address:id});
 			if(result){
+				rj.collection = result;
 				rj.ok = true;
 				statusCode = 200;
 			} else {//no error, collection just wasn't found in our db.   we should try to fetch it from the OS API
