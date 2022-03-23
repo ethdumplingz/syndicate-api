@@ -1,7 +1,9 @@
 const express = require('express'),
 	router = express.Router();
 
-const collectionUtils = require("../../common/collections/utils");
+const Queue = require("bull");
+const collectionsQueue = new Queue('collections', process.env.INTERNALREDISCONNECTIONSTR);
+const collectionsUtils = require("../../common/collections/utils");
 
 router.get(`/get/:id`, async (req, res, next) => {
 	const loggingTag = `[path: ${req.path}]`;
@@ -15,13 +17,15 @@ router.get(`/get/:id`, async (req, res, next) => {
 	try{
 		const {id} = req.params;
 		try{
-			const result = await collectionUtils.get({address:id});
+			const result = await collectionsUtils.get({address:id});
 			if(result){
 				rj.collection = result;
 				rj.ok = true;
 				statusCode = 200;
 			} else {//no error, collection just wasn't found in our db.   we should try to fetch it from the OS API
-				collectionUtils.fetch({id});
+				// collectionsUtils.fetch({id});
+				//add an item to the queue
+				collectionsQueue.add({id});
 			}
 		} catch(e){
 			rj.errors.push(e);
