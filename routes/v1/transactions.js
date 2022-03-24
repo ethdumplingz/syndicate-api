@@ -4,7 +4,7 @@ const transactionsUtils = require("../../common/transactions/utils");
 const Queue = require("bull");
 const transactionsQueue = new Queue('transactions', process.env.INTERNALREDISCONNECTIONSTR);
 
-router.post(`/get`, async(req, res) => {
+router.post(`/get-bulk`, async(req, res) => {
 	const loggingTag = `${req.path}`;
 	let rj = {
 		ok: false,
@@ -26,8 +26,9 @@ router.post(`/get`, async(req, res) => {
 		if(transactions.length !== hashes.length){//the size of the results did not match the num requested.
 			// let's add items to the task queue for the items missing
 			const hashesOfTransactionsFound = transactions.map(transaction => transaction.hash);
-			console.info(`${loggingTag} hashes of transactions found`, hashesOfTransactionsFound);
+			console.info(`${loggingTag} ${hashesOfTransactionsFound.length} transactions found`);
 			const hashesOfTransactionsToBeQueued = hashes.filter(hash => hashesOfTransactionsFound.indexOf(hash) === -1);
+			console.info(`${loggingTag} Adding ${hashesOfTransactionsToBeQueued} to the transactions queue...`);
 			hashesOfTransactionsToBeQueued.forEach(hash => {
 				console.info(`${loggingTag}[hash:${hash}] Adding item to transactions queue to fetch from Alchemy API`);
 				transactionsQueue.add({hash});//queue this with a delay from

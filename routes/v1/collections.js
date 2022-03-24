@@ -70,7 +70,7 @@ router.post(`/get-bulk`, async(req, res) => {
 			const addressesOfCollectionsFound = collections.map(collection => collection._id);
 			console.info(`${loggingTag} ${addressesOfCollectionsFound.length} collections found`);
 			const addressesOfCollectionToBeQueued = addresses.filter(address => addressesOfCollectionsFound.indexOf(address) === -1);
-			console.info(`${loggingTag} queuing ${addressesOfCollectionToBeQueued} collections to be fetched...`);
+			console.info(`${loggingTag} queuing ${addressesOfCollectionToBeQueued.length} collections to be fetched...`);
 			addressesOfCollectionToBeQueued.forEach(address => {
 				const queueDelay = getRandomInt(10000);
 				console.info(`${loggingTag}[address:${address}] Adding item to collections queue (w/ a delay of ${queueDelay}ms) to fetch info from OS`);
