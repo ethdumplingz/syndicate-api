@@ -28,7 +28,7 @@ const getCollectionsFromDB = async ({addresses = ''} = {}) => {
 				
 				while(await cursor.hasNext()){
 					const item = await cursor.next();
-					item.push(item);
+					items.push(item);
 				}
 				
 			} catch(e){
