@@ -14,4 +14,7 @@ router.use('/mint', mintRouter);
 const collectionsRouter = require('./collections');
 router.use('/collections', collectionsRouter);
 
+const transactionsRouter = require('./transactions');
+router.use('/transactions', transactionsRouter);
+
 module.exports = router;
