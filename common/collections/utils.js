@@ -9,9 +9,9 @@ const baseURIs = {
 const baseLoggingTag = `[COLLECTIONS]`;
 
 
-const getCollectionFromDB = async ({address = ''} = {}) => {
+const getCollectionsFromDB = async ({addresses = ''} = {}) => {
 	const loggingTag = `${baseLoggingTag}[getCollection]`;
-	let item = false;
+	let items = [];
 	try{
 		
 		try{
@@ -21,11 +21,14 @@ const getCollectionFromDB = async ({address = ''} = {}) => {
 				
 				const	collection = await db.collection.init({client, collection:{name: db.collection.names.collections}});
 				const cursor = await collection.find({
-					_id:address
+					_id:{
+						$in: addresses
+					}
 				});
 				
 				while(await cursor.hasNext()){
-					item = await cursor.next();
+					const item = await cursor.next();
+					item.push(item);
 				}
 				
 			} catch(e){
@@ -42,7 +45,7 @@ const getCollectionFromDB = async ({address = ''} = {}) => {
 		console.error(`${loggingTag} Error:`, e);
 		throw e;
 	}
-	return item;
+	return items;
 }
 
 const upsertCollectionIntoDB = async ({collection} = {}) => {
@@ -164,7 +167,7 @@ const fetchCollectionInfoAndUpsert = async ({id = ""} = {}) => {
 }
 
 module.exports = {
-	get: getCollectionFromDB,
+	get: getCollectionsFromDB,
 	add: upsertCollectionIntoDB,
 	fetch: fetchCollectionInfoAndUpsert
 }
