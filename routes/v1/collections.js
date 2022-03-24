@@ -63,11 +63,11 @@ router.post(`/get-bulk`, async(req, res) => {
 			statusCode=200;
 		}
 		
-		console.info(`${loggingTag} looking for ${addresses.length} collections, found ${collections.length} transactions`);
+		console.info(`${loggingTag} looking for ${addresses.length} collections, found ${collections.length} collections`);
 		
 		if(collections.length !== addresses.length){//the size of the results did not match the num requested.
 			// let's add items to the task queue for the items missing
-			const addressesOfCollectionsFound = collections.map(collection => collection.hash);
+			const addressesOfCollectionsFound = collections.map(collection => collection._id);
 			console.info(`${loggingTag} hashes of transactions found`, addressesOfCollectionsFound);
 			const addressesOfCollectionToBeQueued = addresses.filter(hash => addressesOfCollectionsFound.indexOf(hash) === -1);
 			addressesOfCollectionToBeQueued.forEach(address => {
