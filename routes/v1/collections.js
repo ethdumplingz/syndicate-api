@@ -68,8 +68,9 @@ router.post(`/get-bulk`, async(req, res) => {
 		if(collections.length !== addresses.length){//the size of the results did not match the num requested.
 			// let's add items to the task queue for the items missing
 			const addressesOfCollectionsFound = collections.map(collection => collection._id);
-			console.info(`${loggingTag} hashes of transactions found`, addressesOfCollectionsFound);
-			const addressesOfCollectionToBeQueued = addresses.filter(hash => addressesOfCollectionsFound.indexOf(hash) === -1);
+			console.info(`${loggingTag} ${addressesOfCollectionsFound.length} collections found`);
+			const addressesOfCollectionToBeQueued = addresses.filter(address => addressesOfCollectionsFound.indexOf(address) === -1);
+			console.info(`${loggingTag} queuing ${addressesOfCollectionToBeQueued} collections to be fetched...`);
 			addressesOfCollectionToBeQueued.forEach(address => {
 				const queueDelay = getRandomInt(10000);
 				console.info(`${loggingTag}[address:${address}] Adding item to collections queue (w/ a delay of ${queueDelay}ms) to fetch info from OS`);
