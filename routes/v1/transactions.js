@@ -17,6 +17,8 @@ router.post(`/get`, async(req, res) => {
 		const transactions = await transactionsUtils.get({hashes});
 		if(transactions.length > 0){
 			rj.transactions = transactions;
+			rj.ok=true;
+			statusCode=200;
 		}
 		
 		console.info(`${loggingTag} looking for ${hashes.length} transactions, found ${transactions.length} transactions`);
