@@ -15,6 +15,7 @@ router.post(`/get-bulk`, async(req, res) => {
 	try{
 		const {hashes} = req.body;
 		const transactions = await transactionsUtils.get({hashes});
+		
 		if(transactions.length > 0){
 			rj.transactions = transactions;
 			rj.ok=true;
@@ -27,8 +28,8 @@ router.post(`/get-bulk`, async(req, res) => {
 			// let's add items to the task queue for the items missing
 			const hashesOfTransactionsFound = transactions.map(transaction => transaction.hash);
 			console.info(`${loggingTag} ${hashesOfTransactionsFound.length} transactions found`);
-			const hashesOfTransactionsToBeQueued = hashes.filter(hash => hashesOfTransactionsFound.indexOf(hash) === -1);
-			console.info(`${loggingTag} Adding ${hashesOfTransactionsToBeQueued} to the transactions queue...`);
+			const hashesOfTransactionsToBeQueued = hashes.filter(hash => (hashesOfTransactionsFound.indexOf(hash) === -1));
+			console.info(`${loggingTag} Adding ${hashesOfTransactionsToBeQueued.length} to the transactions queue...`);
 			hashesOfTransactionsToBeQueued.forEach(hash => {
 				console.info(`${loggingTag}[hash:${hash}] Adding item to transactions queue to fetch from Alchemy API`);
 				transactionsQueue.add({hash});//queue this with a delay from
