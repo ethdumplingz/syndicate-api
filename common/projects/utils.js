@@ -130,7 +130,7 @@ const updateProjectVisibility = async ({id, is_active:isActive = false} = {}) =>
 	return outcome;
 }
 
-const getProjects = async ({user = ''} = {}) => {
+const getProjects = async ({user = '', admin = false} = {}) => {
 	const loggingTag = `${baseAppLoggingTag}[getProjects]`;
 	let projects = [];
 	
@@ -146,9 +146,9 @@ const getProjects = async ({user = ''} = {}) => {
 					   FROM ${fullInfoTable} p
 							LEFT JOIN users_followed_projects ufp ON ufp.project_id = p.id AND ufp.user_address = $1
 							LEFT JOIN user_project_votes upv ON upv.project_id = p.id AND upv.user_address = $1
-					   WHERE p.ts_presale_start > NOW() OR date_part('epoch', p.ts_presale_start) = 0
+					   WHERE (p.ts_presale_start > NOW() OR date_part('epoch', p.ts_presale_start) = 0) AND is_active = $2
 					   ORDER BY p.ts_presale_start`,
-				values: [user]
+				values: [user, !admin]
 			};
 			
 			console.info(`${loggingTag} getting projects...`);

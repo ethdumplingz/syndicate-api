@@ -17,4 +17,7 @@ router.use('/collections', collectionsRouter);
 const transactionsRouter = require('./transactions');
 router.use('/transactions', transactionsRouter);
 
+const walletRouter = require('./wallet');
+router.use('/wallet', walletRouter);
+
 module.exports = router;

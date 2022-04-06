@@ -79,10 +79,22 @@ const releaseConnection = async ({client} = {}) => {
 	}
 }
 
+const endPool = async () => {
+	const loggingTag = `${dbLoggingTag}[endPool]`;
+	try{
+		await pool.end();
+	} catch(e){
+		console.error(`${loggingTag} Unable to end pool`, e);
+	}
+}
+
 module.exports = {
 	connect: connectToDB,
-	connection:{
+	connection: {
 		get: getConnection,
-		release: releaseConnection
+		release: releaseConnection,
+		pool: {
+			end: endPool
+		}
 	}
 }

@@ -12,8 +12,8 @@ router.get(`/:user/team/check`, async (req, res, next) => {
 		},
 		statusCode = 400;
 	try{
-		const user = req.params.user;
-		rj.ok = await usersUtil.isTeam({user});
+		const {user} = req.params;
+		rj.ok = await usersUtil.isTeam({user:user.toLowerCase()});
 		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
