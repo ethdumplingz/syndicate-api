@@ -139,8 +139,7 @@ const getProjects = async ({user = '', admin = false} = {}) => {
 		try{
 			client = await db.connection.get();
 			const getQuery = {
-				name: `get-projects-for-user`,
-				text: `SELECT p.id, p.title, p.presale_price, p.public_price, p.ts_presale_start, p.max_supply, p.website_url, p.website_url, p.twitter_url, p.discord_url, p.wl_register_url, p.score, p.upvotes, p.downvotes,
+				text: `SELECT p.id, p.title, p.presale_price, p.public_price, p.ts_presale_start, p.max_supply, p.website_url, p.website_url, p.twitter_url, p.discord_url, p.wl_register_url, p.score, p.upvotes, p.downvotes, p.is_active,
 							  CASE WHEN ufp.user_address IS NOT NULL THEN true ELSE false END AS is_following,
 							  CASE WHEN upv.vote IS NOT NULL THEN upv.vote ELSE 0 END AS vote
 					   FROM ${fullInfoTable} p
