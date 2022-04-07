@@ -160,7 +160,7 @@ const getUsersActiveProjects = async ({id:userID=""} = {}) => {
 		const client = await db.connection.get();
 		// console.info(`${loggingTag} got client`, client);
 		const query = {
-			text: `SELECT * FROM ${userActiveProjectsTable} WHERE user_address = $1 AND (ts_presale_end >= current_date - interval '7 day' OR date_part('epoch', ts_presale_start) = 0) ORDER BY ts_presale_start`,
+			text: `SELECT * FROM ${userActiveProjectsTable} WHERE user_address = $1 AND (ts_presale_start >= current_date - interval '7 day' OR date_part('epoch', ts_presale_start) = 0) ORDER BY ts_presale_start`,
 			values: [userID]
 		};
 		console.info(`${loggingTag} Getting user's active projects. query`, query);
