@@ -152,8 +152,9 @@ router.post(`/projects/actions/update`, async (req, res, next) => {
 		statusCode = 400;
 	try{
 		const {user, project_id, action, value} = req.body;
-
-		rj.ok = await usersUtil.projects.actions.update({user, project_id, action, value});
+		const result = await usersUtil.projects.actions.update({user, project_id, action, value});
+		
+		rj.ok = result.rowCount > 0;
 		statusCode = 200;
 
 	} catch(e){
