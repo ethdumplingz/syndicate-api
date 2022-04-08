@@ -27,7 +27,8 @@
     "moralis": "^1.5.5",
     "multer": "^1.4.4",
     "opensea-js": "^2.0.1",
-    "pg": "^8.7.3"
+    "pg": "^8.7.3",
+    "pg-copy-streams": "^6.0.2"
   },
   "engines": {
     "node": ">=14"

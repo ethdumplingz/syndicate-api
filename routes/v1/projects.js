@@ -179,54 +179,77 @@ router.post(["/hide/", "/show/"], async (req, res, next) => {
 
 //modules added for csv upload
 const multer = require("multer"),
-	csv = require("fast-csv"),
 	fs = require("fs"),
-	upload = multer({dest:"tmp/csv/"});
+	readline = require('readline'),
+	upload = multer({dest:"tmp/csv/"}),
+	db = require("../../db/utils"),
+	copyFrom = require('pg-copy-streams').from;
 
-router.post("/bulk/add/", upload.single("file"), (req, res) => {
+router.post("/bulk/add/", upload.single("file"), async (req, res) => {
 	let rj = {
-		ok: false,
-		rows_added: 0,
-		errors:[]
-	},
+			ok: false,
+			rowsAdded: 0,
+			errors: []
+		},
 		statusCode = 400;
+
 	const loggingTag = `[path:${req.path}]`;
-	console.info(`${loggingTag} here!!!`);
-	const fileRows = [];
-	try{
+	console.info(`${loggingTag} Upload projects from csv!`);
+	try {
 		console.info(`${loggingTag} file path:`);
+
+		const client = await db.connection.get();
+
+		let inputStream = fs.createReadStream(req.file.path);
+		const reader = readline.createInterface({ input: inputStream });
+		const header = await new Promise((resolve) => {
+			reader.on('line', (line) => {
+				reader.close();
+				resolve(line);
+			});
+		});
+		console.info(`Importing csv with header: ${header}`);
+
+		const dbStream = client.query(copyFrom(`COPY projects (${header}) FROM STDIN CSV HEADER`))
+			.on('error', (e) => {
+				rj.errors.push(e);
+				console.error(`${loggingTag} error occurred`, e);
+			})
+			.on('end', () => {
+				console.info(`Completed loading data into projects table`);
+				client.release();
+			});
+
 		fs.createReadStream(req.file.path)
-			.pipe(csv.parse({headers:true}))
-			.on("data", (row) => {
-				fileRows.push(row);
+			.on("data", () => {
+				rj.rowsAdded++;
 			})
 			.on("error", (e) => {
 				rj.errors.push(e);
 				console.error(`${loggingTag} error occurred`, e);
 			})
 			.on("end", (rowCount) => {
-				console.info(`${loggingTag} num rows processed: ${rowCount}`);
-				console.info(`${loggingTag} File rows:`, fileRows);
-				if(rj.errors.length < 1){
+				console.info(`${loggingTag} num rows added: ${rj.rowsAdded}`);
+				if (rj.errors.length < 1) {
 					rj.ok = true;
 					statusCode = 200;
 				}
-				
-				try{
+
+				try {
 					fs.unlinkSync(req.file.path);
 					console.info(`${loggingTag} temp file deleted!`);
-				} catch(e){
+				} catch (e) {
 					rj.errors.push(e);
 					console.error(`${loggingTag} Error:`, e);
 				}
 				res.status(statusCode).json(rj).end();
-			});
-	} catch(e){
+			})
+			.pipe(dbStream);
+	} catch (e) {
 		rj.errors.push(e);
 		console.error(`${loggingTag} Error:`, e);
 		res.status(statusCode).json(rj).end();
 	}
-	
 });
 
 module.exports = router;
