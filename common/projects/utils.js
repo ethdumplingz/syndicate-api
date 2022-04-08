@@ -1,4 +1,5 @@
 const db = require("../../db/utils");
+const {projects} = require("../users/utils");
 const baseAppLoggingTag = `[PROJECTS]`;
 
 const table = `projects`;
@@ -234,13 +235,46 @@ const getProjectScore = async ({id = ""} = {}) => {
 	return score;
 }
 
+const checkIfProjectExists = async ({twitter = ""} = {}) => {
+	const loggingTag = `${baseAppLoggingTag}[checkIfProjectExists]`;
+	let exists = false;
+	if (twitter.length < 1) {
+		throw new Error("Missing ID of project to retrieve");
+	} else {
+		try {
+			const client = await db.connection.get();
+			const getQuery = {
+				name: `check-project-${twitter}`,
+				text: `SELECT *
+				 FROM ${table}
+				 WHERE twitter_url = $1`,
+				values: [twitter]
+			};
+			
+			console.info(`${loggingTag} checking if project exists...`);
+			try {
+				const result = await client.query(getQuery);
+				exists = result.rows.length > 0;
+				console.info(`${loggingTag} got project exists? ${exists}`);
+			} finally {
+				await db.connection.release({client});
+			}
+			
+		} catch (e) {
+			throw e;
+		}
+	}
+	return exists;
+}
+
 module.exports = {
-    insert: insertProject,
-    update: updateProject,
-    delete: deleteProject,
-		hide: hideProject,
-		show: showProject,
-    get: getProjects,
-    getSingle: getSingleProject,
-    getScore: getProjectScore,
+	insert: insertProject,
+	update: updateProject,
+	delete: deleteProject,
+	hide: hideProject,
+	show: showProject,
+	get: getProjects,
+	getSingle: getSingleProject,
+	getScore: getProjectScore,
+	exists: checkIfProjectExists
 }

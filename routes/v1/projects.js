@@ -65,21 +65,24 @@ router.get("/get", async (req, res, next) => {
 	res.status(statusCode).json(rj).end();
 });
 
-router.get("/:address", (req, res, next) => {
+router.get("/exists", async (req, res, next) => {
 	const loggingTag = `[path:${req.path}]`;
 	let rj = {
 			ok: false,
-			address: '',
-			contracts:[],
+			exists: false,
 			errors: []
 		},
 		statusCode = 400;
 	try{
-		rj.address = req.params.address;
-		res.status(statusCode).json(rj).end();
+		const {twitter} = req.query;
+		rj.exists = await projectsUtil.exists({twitter});
+		rj.ok = true;
+		
+		statusCode = 200;
 	} catch(e){
 		console.error(`${loggingTag} Error:`, e);
 	}
+	res.status(statusCode).json(rj).end();
 });
 
 router.post("/add", async (req, res, next) => {
