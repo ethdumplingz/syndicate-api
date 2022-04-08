@@ -80,6 +80,7 @@ router.get("/exists", async (req, res, next) => {
 		
 		statusCode = 200;
 	} catch(e){
+		rj.errors.push(e);
 		console.error(`${loggingTag} Error:`, e);
 	}
 	res.status(statusCode).json(rj).end();
