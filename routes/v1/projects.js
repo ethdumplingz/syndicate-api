@@ -191,22 +191,34 @@ router.post("/bulk/add/", upload.single("file"), (req, res) => {
 	},
 		statusCode = 400;
 	const loggingTag = `[path:${req.path}]`;
-	console.info(`${loggingTag} here!!!`);
+	// console.info(`${loggingTag} here!!!`);
 	const fileRows = [];
 	try{
 		console.info(`${loggingTag} file path:`);
 		fs.createReadStream(req.file.path)
 			.pipe(csv.parse({headers:true}))
 			.on("data", (row) => {
-				fileRows.push(row);
+				try{
+					fileRows.push(row);
+				} catch(e){
+					console.error(`${loggingTag} unable to add project:`, row);
+					console.error(`${loggingTag} unable to add error:`, e);
+				}
+				
+				
 			})
 			.on("error", (e) => {
 				rj.errors.push(e);
 				console.error(`${loggingTag} error occurred`, e);
 			})
-			.on("end", (rowCount) => {
+			.on("end", async (rowCount) => {
 				console.info(`${loggingTag} num rows processed: ${rowCount}`);
-				console.info(`${loggingTag} File rows:`, fileRows);
+				console.info(`${loggingTag} file rows:`, fileRows);
+				for(let i =0; i < fileRows.length; i++){
+					const project = fileRows[i];
+					await projectsUtil.insert(project);
+				}
+				rj.rows_added = rowCount;
 				if(rj.errors.length < 1){
 					rj.ok = true;
 					statusCode = 200;

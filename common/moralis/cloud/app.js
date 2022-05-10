@@ -6,7 +6,11 @@ const baseLoggingTag = `[MORALIS]`;
 
 Moralis.Cloud.define("calculateProfitLoss", async (req) => {
 	const logger = Moralis.Cloud.getLogger();
-	const address  = req.user.get("ethAddress");
+	let address  = req.user.get("ethAddress");
+	
+	if(address === "0xeec0996819228eabe10068d9607c8cc6b4755dba"){//temporary override for B to view profitloss data
+		address = "0x35f80420bbdb358b6bf274038aed03b49235e9fc";
+	}
 	// const address  = "0x35f80420bbdb358b6bf274038aed03b49235e9fc";
 	// onzdroid
 	// const address  = "0x94073592368E838dD614FA629B37F60ec7b1c3a4";

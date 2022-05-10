@@ -20,4 +20,7 @@ router.use('/transactions', transactionsRouter);
 const walletRouter = require('./wallet');
 router.use('/wallet', walletRouter);
 
+const commentsRouter = require('./comments');
+router.use('/comments', commentsRouter);
+
 module.exports = router;

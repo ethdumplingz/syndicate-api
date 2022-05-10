@@ -1,7 +1,5 @@
 const db = require("../../db/utils");
-const {projects} = require("../users/utils");
 const baseAppLoggingTag = `[PROJECTS]`;
-
 const table = `projects`;
 const statusesTable = `user_project_statuses`;
 const scoreTable = `project_user_scores`;
